@@ -2,36 +2,27 @@ const dbService = require('./bd/Conexion');
 const bcrypt = require('bcrypt');
 
 class UsuarioModelo {
-
-    // Verificar si ya existen usuarios con el mismo documento, teléfono o email
     static async verificarDuplicados(documento, telefono, email) {
-        const resultado = {
-            documento: false,
-            telefono: false,
-            email: false
-        };
+        const resultado = { documento: false, telefono: false, email: false };
 
         try {
-            // Verificar documento duplicado
-            const docQuery = 'SELECT COUNT(*) as count FROM usuarios WHERE documento = ?';
-            const docResult = await dbService.query(docQuery, [documento]);
-            if (docResult[0].count > 0) {
-                resultado.documento = true;
-            }
+            const docResult = await dbService.query(
+                'SELECT COUNT(*) AS count FROM usuarios WHERE documento = ?',
+                [documento]
+            );
+            if (docResult[0].count > 0) resultado.documento = true;
 
-            // Verificar email duplicado
-            const emailQuery = 'SELECT COUNT(*) as count FROM usuarios WHERE correo = ?';
-            const emailResult = await dbService.query(emailQuery, [email]);
-            if (emailResult[0].count > 0) {
-                resultado.email = true;
-            }
+            const emailResult = await dbService.query(
+                'SELECT COUNT(*) AS count FROM usuarios WHERE correo = ?',
+                [email]
+            );
+            if (emailResult[0].count > 0) resultado.email = true;
 
-            // Verificar teléfono duplicado
-            const telQuery = 'SELECT COUNT(*) as count FROM usuarios WHERE telefono = ?';
-            const telResult = await dbService.query(telQuery, [telefono]);
-            if (telResult[0].count > 0) {
-                resultado.telefono = true;
-            }
+            const telResult = await dbService.query(
+                'SELECT COUNT(*) AS count FROM usuarios WHERE telefono = ?',
+                [telefono]
+            );
+            if (telResult[0].count > 0) resultado.telefono = true;
 
             return resultado;
         } catch (err) {
@@ -39,41 +30,237 @@ class UsuarioModelo {
         }
     }
 
-    // Crear un nuevo usuario
     static async crearUsuarios(documento, nombre, telefono, email, contrasena, terminos) {
-        const query = 'INSERT INTO usuarios (documento, nombres, telefono, correo, contrasena, rol, estado, terminos) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+        const query = `
+            INSERT INTO usuarios (documento, nombres, telefono, correo, contrasena, rol, estado, terminos)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `;
 
         try {
-            // Generar el hash de la contraseña con bcrypt
-            const salto = 10; // Nivel de seguridad de encriptación
-            const contraHash = await bcrypt.hash(contrasena, salto);
-
+            const hash = await bcrypt.hash(contrasena, 10);
             return await dbService.query(query, [
-                documento,
-                nombre,
-                telefono,
-                email,
-                contraHash,
-                "Administrador",
-                "Activo",
-                terminos
+                documento, nombre, telefono, email, hash, "Administrador", "Activo", terminos
             ]);
         } catch (err) {
             throw new Error(`Error al crear el usuario: ${err.message}`);
         }
     }
 
-    // Buscar usuario por email
     static async buscarPorEmail(email) {
-        const query = 'SELECT * FROM usuarios WHERE correo = ?';
-
         try {
-            const resultado = await dbService.query(query, [email]);
-            return resultado.length > 0 ? resultado[0] : null;
+            const result = await dbService.query('SELECT * FROM usuarios WHERE correo = ?', [email]);
+            return result.length > 0 ? result[0] : null;
         } catch (err) {
             throw new Error(`Error al buscar el usuario por correo: ${err.message}`);
         }
     }
+
+    static async verificarLogin(email, contrasena) {
+        try {
+            const result = await dbService.query('SELECT * FROM usuarios WHERE correo = ?', [email]);
+            const ahora = new Date();
+
+            if (result.length === 0) {
+                return { exito: false, mensaje: "Correo o contraseña incorrectos" };
+            }
+
+            const usuario = result[0];
+
+            if (usuario.bloqueado_hasta && new Date(usuario.bloqueado_hasta) > ahora) {
+                return {
+                    exito: false,
+                    mensaje: `Cuenta bloqueada hasta las ${new Date(usuario.bloqueado_hasta).toLocaleTimeString()}`
+                };
+            }
+
+            const coincide = await bcrypt.compare(contrasena, usuario.contrasena);
+            if (!coincide) {
+                let intentos = (usuario.intentos_fallidos || 0) + 1;
+                let bloqueadoHasta = null;
+                let nuevoEstado = usuario.estado;
+
+                if (intentos >= 3) {
+                    bloqueadoHasta = new Date(ahora.getTime() + 15 * 60000);
+                    nuevoEstado = "Bloqueado";
+                }
+
+                if (intentos === 2) {
+                    return {
+                        exito: false,
+                        mensaje: "Segundo intento fallido, si falla una vez más, tu cuenta será bloqueada"
+                    };
+                }
+
+                await dbService.query(
+                    'UPDATE usuarios SET intentos_fallidos = ?, bloqueado_hasta = ?, estado = ? WHERE correo = ?',
+                    [intentos, bloqueadoHasta, nuevoEstado, email]
+                );
+
+                return {
+                    exito: false,
+                    mensaje: intentos >= 3
+                        ? "Tu cuenta está bloqueada debido a múltiples intentos fallidos"
+                        : "Correo o contraseña incorrectos"
+                };
+            }
+
+            await dbService.query(
+                'UPDATE usuarios SET intentos_fallidos = 0, bloqueado_hasta = NULL, estado = "Activo" WHERE correo = ?',
+                [email]
+            );
+
+            return { exito: true, usuario };
+
+        } catch (err) {
+            throw new Error(`Error en el inicio de sesión: ${err.message}`);
+        }
+    }
+
+    static async guardarToken({ nombres, rol, correo, llave }) {
+        try {
+            const sql = `
+                INSERT INTO token (usuario, rol, correo, llave)
+                VALUES (?, ?, ?, ?)
+            `;
+            await dbService.query(sql, [nombres, rol, correo, llave]);
+        } catch (error) {
+            console.error('Error al guardar el token en la base de datos:', error.message);
+            throw new Error('No se pudo guardar el token');
+        }
+    }
+
+    static async eliminarToken(llave) {
+        try {
+            const result = await dbService.query('DELETE FROM token WHERE llave = ?', [llave]);
+
+            if (result.affectedRows !== undefined && result.affectedRows === 0) {
+                throw new Error('El token no existe en la base de datos');
+            }
+
+            return result;
+        } catch (error) {
+            console.error('Error al eliminar el token:', error.message);
+            throw new Error('No se pudo eliminar el token');
+        }
+    }
+
+    static async inactivarUsuario(email) {
+        try {
+            const result = await dbService.query(
+                'UPDATE usuarios SET estado = "Inactivo" WHERE correo = ?',
+                [email]
+            );
+
+            if (result.affectedRows === 0) {
+                throw new Error('No se encontró el usuario para inactivar');
+            }
+
+            return result;
+        } catch (error) {
+            console.error('Error al inactivar el usuario:', error.message);
+            throw new Error('No se pudo inactivar el usuario');
+        }
+    }
+
+    static async reactivarUsuario(email) {
+        try {
+            const result = await dbService.query(
+                'UPDATE usuarios SET estado = "Activo" WHERE correo = ?',
+                [email]
+            );
+
+            if (result.affectedRows === 0) {
+                throw new Error('No se encontró el usuario para reactivar');
+            }
+
+            return result;
+        } catch (error) {
+            console.error('Error al reactivar el usuario:', error.message);
+            throw new Error('No se pudo reactivar el usuario');
+        }
+    }
+
+    // 🔧 MÉTODO ACTUALIZADO: editar perfil en ambas tablas
+    static async editarPerfil(idUsuario, datos) {
+        const {
+            telefono,
+            correo,
+            direccion,
+            fechaExpedicion,
+            idPregunta1,
+            respuesta1,
+            idPregunta2,
+            respuesta2,
+            idPregunta3,
+            respuesta3,
+            nombre
+        } = datos;
+
+        const connection = await dbService.pool.promise().getConnection();
+
+        try {
+            await connection.beginTransaction();
+
+            // Actualiza la tabla 'usuarios'
+            await connection.query(
+                `UPDATE usuarios SET nombres = ?, correo = ?, telefono = ? WHERE idUsuario = ?`,
+                [nombre, correo, telefono, idUsuario]
+            );
+
+            // Obtener documento del usuario por su id
+            const [rows] = await connection.query(
+                'SELECT documento FROM usuarios WHERE idUsuario = ?',
+                [idUsuario]
+            );
+
+            if (!rows || rows.length === 0) {
+                throw new Error('No se encontró el documento del usuario');
+            }
+
+            const documento = rows[0].documento;
+
+            // Actualiza la tabla 'perfil' incluyendo el campo 'correo'
+            await connection.query(
+                `UPDATE perfil SET
+                    nombres = ?,
+                    telefono = ?,
+                    correo = ?,
+                    direccion = ?,
+                    fechaexpedicion = ?,
+                    idPregunta1 = ?,
+                    respuesta1 = ?,
+                    idPregunta2 = ?,
+                    respuesta2 = ?,
+                    idPregunta3 = ?,
+                    respuesta3 = ?
+                 WHERE documento = ?`,
+                [
+                    nombre,
+                    telefono,
+                    correo,
+                    direccion,
+                    fechaExpedicion,
+                    idPregunta1,
+                    respuesta1,
+                    idPregunta2,
+                    respuesta2,
+                    idPregunta3,
+                    respuesta3,
+                    documento
+                ]
+            );
+
+            await connection.commit();
+            return { mensaje: 'Perfil actualizado correctamente.' };
+
+        } catch (error) {
+            await connection.rollback();
+            console.error('Error al editar perfil:', error.message);
+            throw new Error('Error al actualizar el perfil');
+        } finally {
+            connection.release();
+        }
+    }
 }
 
-module.exports = UsuarioModelo; // Exporta la clase para ser utilizada en otros archivos
+module.exports = UsuarioModelo;
