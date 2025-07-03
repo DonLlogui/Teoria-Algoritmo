@@ -1,5 +1,7 @@
 const modelo = require('../../modelo/UsuarioModelo');
 const { enviarCorreoBienvenida } = require('../../services/mailer');
+const { enviarCorreoEdicionPerfil } = require('../../services/mailer');
+const { enviarCorreoInactivarCuenta } = require('../../services/mailer');
 const jwt = require('jsonwebtoken');
 
 class UsuariosControlador {
@@ -166,14 +168,16 @@ class UsuariosControlador {
             const usuario = resultado.usuario;
 
             if (usuario.estado === 'Inactivo') {
-                return res.status(400).json({ error: 'El usuario ya está eliminado' });
+                return res.status(400).json({ error: 'El usuario ya está inactivo' });
             }
 
             await modelo.inactivarUsuario(email);
 
-            res.status(200).json({ mensaje: 'Cuenta eliminada correctamente' });
+            await enviarCorreoInactivarCuenta(usuario.correo, usuario.nombres);
+
+            res.status(200).json({ mensaje: 'Cuenta desactivada correctamente' });
         } catch (err) {
-            console.error('Error al eliminar la cuenta:', err);
+            console.error('Error al desactivar la cuenta:', err);
             res.status(500).json({ error: 'Error interno del servidor' });
         }
     }
@@ -218,6 +222,8 @@ class UsuariosControlador {
             }
 
             const resultado = await modelo.editarPerfil(idUsuario, datos);
+
+            await enviarCorreoEdicionPerfil(datos.correo, datos.nombre);
 
             res.status(200).json({ mensaje: resultado.mensaje });
         } catch (error) {
