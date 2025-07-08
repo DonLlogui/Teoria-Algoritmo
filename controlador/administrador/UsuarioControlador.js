@@ -3,6 +3,7 @@ const { enviarCorreoBienvenida } = require('../../services/mailer');
 const { enviarCorreoEdicionPerfil } = require('../../services/mailer');
 const { enviarCorreoInactivarCuenta } = require('../../services/mailer');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
 class UsuariosControlador {
     // Crear un nuevo usuario
@@ -229,6 +230,54 @@ class UsuariosControlador {
         } catch (error) {
             console.error('Error al editar el perfil:', error);
             res.status(500).json({ error: 'No se pudo actualizar el perfil' });
+        }
+    }
+
+    static async recuperarContrasena(req, res) {
+        try {
+            const { correo, idPregunta, respuesta, nuevaContrasena } = req.body;
+
+            if (!correo || !idPregunta || !respuesta || !nuevaContrasena) {
+                return res.status(400).json({ error: 'Todos los campos son obligatorios: correo, idPregunta, respuesta y nueva contraseña.' });
+            }
+
+            // Buscar usuario por correo
+            const usuarioResult = await modelo.obtenerUsuarioPorCorreo(correo);
+
+            if (!usuarioResult) {
+                return res.status(404).json({ error: 'Correo no registrado' });
+            }
+
+            const idUsuario = usuarioResult.idUsuario;
+
+            // Validar la respuesta a la pregunta específica
+            const pregunta = await modelo.obtenerPreguntaUsuario(idUsuario, idPregunta);
+
+            if (!pregunta) {
+                return res.status(404).json({ error: 'No se encontró la pregunta de seguridad asociada a este usuario' });
+            }
+
+            if (pregunta.respuesta.trim().toLowerCase() !== respuesta.trim().toLowerCase()) {
+                return res.status(401).json({ error: 'La respuesta a la pregunta de seguridad es incorrecta' });
+            }
+
+            // Validar nueva contraseña
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&_\-#])[A-Za-z\d@$!%*?&_\-#]{8,}$/;
+            if (!passwordRegex.test(nuevaContrasena)) {
+                return res.status(400).json({
+                    error: 'La nueva contraseña debe tener al menos 8 caracteres e incluir mayúsculas, minúsculas, números y caracteres especiales'
+                });
+            }
+
+            // Hashear y actualizar la contraseña
+            const hashedPassword = await bcrypt.hash(nuevaContrasena, 10);
+            await modelo.actualizarContrasena(idUsuario, hashedPassword);
+
+            res.status(200).json({ mensaje: 'Contraseña actualizada correctamente' });
+
+        } catch (err) {
+            console.error('Error al recuperar la contraseña:', err);
+            res.status(500).json({ error: 'Error interno del servidor' });
         }
     }
 }

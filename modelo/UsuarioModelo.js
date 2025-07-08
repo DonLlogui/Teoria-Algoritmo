@@ -180,7 +180,6 @@ class UsuarioModelo {
         }
     }
 
-    // 🔧 MÉTODO ACTUALIZADO: editar perfil en ambas tablas
     static async editarPerfil(idUsuario, datos) {
         const {
             telefono,
@@ -201,13 +200,11 @@ class UsuarioModelo {
         try {
             await connection.beginTransaction();
 
-            // Actualiza la tabla 'usuarios'
             await connection.query(
                 `UPDATE usuarios SET nombres = ?, correo = ?, telefono = ? WHERE idUsuario = ?`,
                 [nombre, correo, telefono, idUsuario]
             );
 
-            // Obtener documento del usuario por su id
             const [rows] = await connection.query(
                 'SELECT documento FROM usuarios WHERE idUsuario = ?',
                 [idUsuario]
@@ -219,7 +216,6 @@ class UsuarioModelo {
 
             const documento = rows[0].documento;
 
-            // Actualiza la tabla 'perfil' incluyendo el campo 'correo'
             await connection.query(
                 `UPDATE perfil SET
                     nombres = ?,
@@ -260,6 +256,34 @@ class UsuarioModelo {
         } finally {
             connection.release();
         }
+    }
+
+    static async obtenerUsuarioPorCorreo(email) {
+        const result = await dbService.query('SELECT idUsuario FROM usuarios WHERE correo = ?', [email]);
+        return result.length > 0 ? result[0] : null;
+    }
+
+    static async obtenerPreguntaUsuario(idUsuario, idPregunta) {
+        const query = `
+            SELECT
+                CASE
+                    WHEN idPregunta1 = ? THEN respuesta1
+                    WHEN idPregunta2 = ? THEN respuesta2
+                    WHEN idPregunta3 = ? THEN respuesta3
+                    ELSE NULL
+                END AS respuesta
+            FROM perfil
+            WHERE idUsuario = ?
+        `;
+        const result = await dbService.query(query, [idPregunta, idPregunta, idPregunta, idUsuario]);
+        return result.length > 0 ? { respuesta: result[0].respuesta } : null;
+    }
+
+    static async actualizarContrasena(idUsuario, hashedPassword) {
+        await dbService.query(
+            'UPDATE usuarios SET contrasena = ? WHERE idUsuario = ?',
+            [hashedPassword, idUsuario]
+        );
     }
 }
 
