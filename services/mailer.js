@@ -40,7 +40,7 @@ const enviarCorreoBienvenida = async (destinatario, nombre) => {
 
         console.log('📨 Correo enviado con ID:', info.messageId);
     } catch (error) {
-        console.error('❌ Error al enviar el correo:', error.message);
+        console.error('Error al enviar el correo:', error.message);
     }
 };
 
@@ -63,7 +63,7 @@ const enviarCorreoEdicionPerfil = async (destinatario, nombre) => {
         });
         console.log('📨 Correo enviado con ID:', info.messageId);
     } catch (error) {
-        console.error('❌ Error al enviar el correo:', error.message);
+        console.error('Error al enviar el correo:', error.message);
     }
 }
 
@@ -86,8 +86,56 @@ const enviarCorreoInactivarCuenta = async (destinatario, nombre) => {
         });
         console.log('📨 Correo enviado con ID:', info.messageId);
     } catch (error) {
-        console.error('❌ Error al enviar el correo:', error.message);
+        console.error('Error al enviar el correo:', error.message);
     }
 }
 
-module.exports = { enviarCorreoBienvenida, enviarCorreoEdicionPerfil, enviarCorreoInactivarCuenta };
+const enviarCorreoRecuperacionUsuario = async (destinatario, nombre) => {
+    try {
+        const info = await transporter.sendMail({
+            from: '"VitalFit" <no-reply@vitalfit.com>',
+            to: destinatario,
+            subject: "¡Tu cuenta ha sido reactivada en VItalFit!",
+            html: `
+                 <div style="font-family: 'Franklin Gothic', sans-serif; color: #333;">
+                     <h2>¡Hola, ${nombre}!</h2>
+                     <p>Nos alegra informarte que tu cuenta ha sido reactivada en VitalFit.</p>
+                     <p>Ya puedes volver a acceder a nuestros servicios.</p>
+                     <br>
+                     <p>Este es un mensaje automático, por favor no respondas.</p>
+                     <hr>
+                     <footer style="font-size: 12px; color: #888;">© 2025 VitalFit. Todos los derechos son reservados.</footer>
+                 </div>
+             `
+        });
+        console.log('📨 Correo enviado con ID:', info.messageId);
+    } catch (error) {
+        console.error('Error al enviar el correo:', error.message);
+    }
+}
+
+const enviarCorreoRecuperacionContrasena = async (destinatario, nombre) => {
+    try {
+        const info = await transporter.sendMail({
+            from: '"VitalFit" <no-reply@vitalfit.com> ',
+            to: destinatario,
+            subject: "¡Contraseña actualizada exitosamente!",
+            html: `
+                 <div style="font-family: 'Franklin Gothic', sans-serif; color: #333;">
+                     <h2>¡Hola, ${nombre}!</h2>
+                     <p>Tu contraseña ha sido recuperada y actualizada correctamente.</p>
+                     <p>Si no reconoces esta acción, por favor contáctanos inmediatamente para proteger tu cuenta.</p>
+                     <br>
+                     <p>Este es un mensaje automático, por favor no respondas.</p>
+                     <hr>
+                     <footer style="font-size: 12px; color: #888;">© 2025 VitalFit. Todos los derechos son reservados.</footer>
+                </div>
+             `
+        });
+           console.log('📨 Correo enviado con ID:', info.messageId);
+    } catch (error) {
+        console.error('Error al enviar el correo:', error.message);
+    }
+}
+
+        module.exports = { enviarCorreoBienvenida, enviarCorreoEdicionPerfil, enviarCorreoInactivarCuenta, enviarCorreoRecuperacionUsuario, enviarCorreoRecuperacionContrasena };

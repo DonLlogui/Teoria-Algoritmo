@@ -2,6 +2,9 @@ const modelo = require('../../modelo/UsuarioModelo');
 const { enviarCorreoBienvenida } = require('../../services/mailer');
 const { enviarCorreoEdicionPerfil } = require('../../services/mailer');
 const { enviarCorreoInactivarCuenta } = require('../../services/mailer');
+const { enviarCorreoRecuperacionUsuario } = require('../../services/mailer');
+const { enviarCorreoRecuperacionContrasena } = require('../../services/mailer');
+
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
@@ -9,14 +12,10 @@ class UsuariosControlador {
     // Crear un nuevo usuario
     static async crearUsuario(req, res) {
         try {
-            const { documento, nombre, telefono, email, contrasena, terminos } = req.body;
+            const { documento, nombre, telefono, email, contrasena} = req.body;
 
             if (!documento || !nombre || !telefono || !email || !contrasena) {
                 return res.status(400).json({ error: 'Todos los campos son obligatorios' });
-            }
-
-            if (!terminos || terminos !== 'true') {
-                return res.status(400).json({ error: 'Debe aceptar los términos y condiciones para registrarse' });
             }
 
             if (!/^\d{8,10}$/.test(documento)) {
@@ -57,7 +56,7 @@ class UsuariosControlador {
                 return res.status(400).json({ error: 'El número de teléfono ya está registrado, intente recuperar su cuenta si la olvidó.' });
             }
 
-            const result = await modelo.crearUsuarios(documento, nombre, telefono, email, contrasena, terminos);
+            const result = await modelo.crearUsuarios(documento, nombre, telefono, email, contrasena);
 
             await enviarCorreoBienvenida(email, nombre);
 
@@ -148,7 +147,7 @@ class UsuariosControlador {
             res.status(200).json({ mensaje: 'Sesión cerrada correctamente' });
         } catch (err) {
             console.error('Error al cerrar sesión:', err);
-            res.status(500).json({ error: 'Error al cerrar sesión' });
+            res.status(500).json({ error: 'Error al cerrar sesión, inicie sesión para confirmar su cierre.' });
         }
     }
 
@@ -204,6 +203,7 @@ class UsuariosControlador {
             }
 
             await modelo.reactivarUsuario(email);
+            await enviarCorreoRecuperacionUsuario(usuario.correo, usuario.nombres);
 
             res.status(200).json({ mensaje: 'Cuenta reactivada correctamente' });
         } catch (err) {
@@ -243,6 +243,7 @@ class UsuariosControlador {
 
             // Buscar usuario por correo
             const usuarioResult = await modelo.obtenerUsuarioPorCorreo(correo);
+            await enviarCorreoRecuperacionContrasena(correo, usuarioResult.nombres);
 
             if (!usuarioResult) {
                 return res.status(404).json({ error: 'Correo no registrado' });
@@ -267,6 +268,7 @@ class UsuariosControlador {
                 return res.status(400).json({
                     error: 'La nueva contraseña debe tener al menos 8 caracteres e incluir mayúsculas, minúsculas, números y caracteres especiales'
                 });
+
             }
 
             // Hashear y actualizar la contraseña

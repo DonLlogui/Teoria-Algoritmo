@@ -30,16 +30,16 @@ class UsuarioModelo {
         }
     }
 
-    static async crearUsuarios(documento, nombre, telefono, email, contrasena, terminos) {
+    static async crearUsuarios(documento, nombre, telefono, email, contrasena) {
         const query = `
-            INSERT INTO usuarios (documento, nombres, telefono, correo, contrasena, rol, estado, terminos)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO usuarios (documento, nombres, telefono, correo, contrasena, rol, estado)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         `;
 
         try {
             const hash = await bcrypt.hash(contrasena, 10);
             return await dbService.query(query, [
-                documento, nombre, telefono, email, hash, "Administrador", "Activo", terminos
+                documento, nombre, telefono, email, hash, "Administrador", "Activo"
             ]);
         } catch (err) {
             throw new Error(`Error al crear el usuario: ${err.message}`);
@@ -259,7 +259,7 @@ class UsuarioModelo {
     }
 
     static async obtenerUsuarioPorCorreo(email) {
-        const result = await dbService.query('SELECT idUsuario FROM usuarios WHERE correo = ?', [email]);
+        const result = await dbService.query('SELECT * FROM usuarios WHERE correo = ?', [email]);
         return result.length > 0 ? result[0] : null;
     }
 
