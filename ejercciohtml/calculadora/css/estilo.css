@@ -1,0 +1,114 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #d8d8dd 0%, #f2f2f3 100%);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+.contenedor-principal {
+    text-align: center;
+}
+
+h1 {
+    font-weight: 300;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    color: #a0a0b0;
+    font-size: 1.2rem;
+}
+
+.calculadora {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    width: 320px;
+}
+
+.pantalla {
+    background-color: #161625;
+    color: #00ffcc; /* Verde neón futurista */
+    font-size: 2.5rem;
+    text-align: right;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    height: 80px;
+    overflow: hidden;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+    font-family: 'Courier New', Courier, monospace; /* Estilo digital */
+}
+
+.teclado {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+button {
+    height: 60px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background:#f0f2f5;
+    color: #fff;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+
+button:active {
+    transform: scale(0.95);
+}
+
+/* Números */
+button:not(.btn-especial):not(.btn-operador):not(.btn-igual) {
+    background: #3a3a50;
+}
+button:not(.btn-especial):not(.btn-operador):not(.btn-igual):hover {
+    background: #454560;
+}
+
+/* Operadores (+ - * / %) */
+.btn-operador {
+    background: #ff9f43;
+    color: #fff;
+    font-weight: bold;
+}
+.btn-operador:hover {
+    background: #ffb063;
+    box-shadow: 0 0 10px #ff9f4380;
+}
+
+/* Especiales (AC, DEL) */
+.btn-especial {
+    background: #ff6b6b;
+    color: white;
+    font-weight: bold;
+}
+.btn-especial:hover {
+    background: #ff8787;
+}
+
+/* Igual (=) */
+.btn-igual {
+    background: #1dd1a1; /* Verde éxito */
+    color: #1e1e2f;
+    font-weight: bold;
+    grid-column: span 1; /* Ocupa su espacio normal */
+}
+.btn-igual:hover {
+    background: #55efc4;
+    box-shadow: 0 0 15px #1dd1a180;
+}

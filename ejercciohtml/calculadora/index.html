@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Digital</title>
+    <link rel="stylesheet" href="./css/estilo.css">
+</head>
+<body>
+    
+    <div class="contenedor-principal">
+        <h1>CALCULADORA DIGITAL</h1>
+
+        <div class="calculadora">
+            <!-- Pantalla: Aquí mostraremos n1 o n2 según el estado -->
+            <div class="pantalla" id="pantalla">0</div>
+
+            <!-- Panel de botones -->
+            <div class="teclado">
+                <button class="btn-especial" onclick="limpiar()">AC</button>
+                <button class="btn-especial" onclick="borrar()">⌫</button>
+                <button class="btn-operador" onclick="prepararOperacion('%')">%</button>
+                <button class="btn-operador" onclick="prepararOperacion('/')">÷</button>
+
+                <button onclick="agregarNumero('7')">7</button>
+                <button onclick="agregarNumero('8')">8</button>
+                <button onclick="agregarNumero('9')">9</button>
+                <button class="btn-operador" onclick="prepararOperacion('*')">×</button>
+
+                <button onclick="agregarNumero('4')">4</button>
+                <button onclick="agregarNumero('5')">5</button>
+                <button onclick="agregarNumero('6')">6</button>
+                <button class="btn-operador" onclick="prepararOperacion('-')">-</button>
+
+                <button onclick="agregarNumero('1')">1</button>
+                <button onclick="agregarNumero('2')">2</button>
+                <button onclick="agregarNumero('3')">3</button>
+                <button class="btn-operador" onclick="prepararOperacion('+')">+</button>
+
+                <button onclick="agregarNumero('00')">00</button>
+                <button onclick="agregarNumero('0')">0</button>
+                <button onclick="agregarNumero('.')">.</button>
+                <button class="btn-igual" onclick="calcular()">=</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="./js/main.js"></script>
+</body>
+</html>
