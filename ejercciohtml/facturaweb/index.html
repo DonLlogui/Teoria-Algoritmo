@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Facturas</title>
+    <link rel="stylesheet" href="./css/estilo.css">
+    <!-- Fuente moderna de Google Fonts para mejor legibilidad -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="contenedor">
+        <header>
+            <h1>Proyecto Factura Web</h1>
+            <p class="subtitulo">Sistema si te la comes</p>
+        </header>
+        
+        <form action="">
+            <div class="grupo-input">
+                <label for="id">Identificación Cliente</label>
+                <input type="text" name="id" id="id" placeholder="Ej: 1098765432">
+            </div>
+
+            <div class="grupo-input">
+                <label for="nom">Nombres y Apellidos</label>
+                <input type="text" name="nom" id="nom" placeholder="Nombre completo">
+            </div>
+
+            <div class="grupo-input">
+                <label for="dir">Dirección</label>
+                <input type="text" name="dir" id="dir" placeholder="Calle, Ciudad">
+            </div>
+
+            <div class="grupo-input">
+                <label for="tel">Teléfono</label>
+                <input type="text" name="tel" id="tel" placeholder="Número de contacto">
+            </div>
+
+            <div class="fila-doble">
+                <div class="grupo-input">
+                    <label for="nfact">N° Factura</label>
+                    <input type="text" name="nfact" id="nfact" placeholder="001-002">
+                </div>
+                <div class="grupo-input">
+                    <label for="fecha">Fecha</label>
+                    <input type="date" name="fecha" id="fecha"> <!-- Cambiado a date para mejor UX -->
+                </div>
+            </div>
+
+            <div class="grupo-input">
+                <label for="rs">Razón Social</label>
+                <input type="text" name="rs" id="rs" placeholder="Empresa o Particular">
+            </div>
+
+            <div class="grupo-input">
+                <label for="prod">Producto</label>
+                <input type="text" name="prod" id="prod" placeholder="Descripción del producto">
+            </div>
+
+            <div class="fila-doble">
+                <div class="grupo-input">
+                    <label for="cant">Cantidad (Kg)</label>
+                    <input type="number" name="cant" id="cant" placeholder="0.00">
+                </div>
+                <div class="grupo-input">
+                    <label for="vu">Valor Unitario ($)</label>
+                    <input type="number" name="vu" id="vu" placeholder="0.00">
+                </div>
+            </div>
+
+            <input type="button" class="boton-factura" value="Generar Factura" onclick="buscar()">
+        </form> 
+    </div>
+    <script src="./js/main.js"></script> 
+</body>
+</html>

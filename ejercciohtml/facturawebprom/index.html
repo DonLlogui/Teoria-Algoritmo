@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Factura Web Minimalista</title>
+    <!-- Fuente Roboto para estilo moderno -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./css/estilo.css">
+</head>
+<body>
+
+    <div class="card-principal" id="cardFactura">
+        <!-- Estado Inicial: Botón -->
+        <div id="vista-inicial">
+            <h1>Sistema de Facturación</h1>
+            <p class="subtitulo">Haga clic para generar un nuevo comprobante</p>
+            <button class="btn-iniciar" onclick="generarFactura()">
+                + Nueva Factura
+            </button>
+        </div>
+
+        <!-- Estado Resultado: Factura (Oculto al inicio) -->
+        <div id="vista-factura" class="oculto">
+            <div class="encabezado-factura">
+                <h2 id="f_rs">Razón Social</h2>
+                <div class="datos-top">
+                    <span id="f_nfact">N° 000</span>
+                    <span id="f_fecha">01/01/2026</span>
+                </div>
+            </div>
+
+            <div class="cuerpo-factura">
+                <div class="seccion">
+                    <h3>Cliente</h3>
+                    <p><strong>ID:</strong> <span id="f_id"></span></p>
+                    <p><strong>Nombre:</strong> <span id="f_nom"></span></p>
+                    <p><strong>Dirección:</strong> <span id="f_dir"></span></p>
+                    <p><strong>Teléfono:</strong> <span id="f_tel"></span></p>
+                </div>
+
+                <div class="seccion">
+                    <h3>Detalle</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Cant.</th>
+                                <th>V. Unit</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td id="f_prod">Producto X</td>
+                                <td id="f_cant">0</td>
+                                <td id="f_vu">$0</td>
+                                <td id="f_subtotal">$0</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="totales">
+                <div class="fila-total">
+                    <span>Subtotal:</span>
+                    <span id="t_subtotal">$0</span>
+                </div>
+                <div class="fila-total">
+                    <span>IVA (19%):</span>
+                    <span id="t_iva">$0</span>
+                </div>
+                <div class="fila-total gran-total">
+                    <span>TOTAL:</span>
+                    <span id="t_total">$0</span>
+                </div>
+            </div>
+
+            <button class="btn-nueva" onclick="reiniciar()">Generar Otra</button>
+        </div>
+    </div>
+
+    <script src="./js/main.js"></script> 
+</body>
+</html>

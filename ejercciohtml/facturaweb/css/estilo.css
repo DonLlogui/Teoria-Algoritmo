@@ -1,0 +1,126 @@
+/* Reset básico y fuente moderna */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    /* Fondo gris azulado muy suave: Transmite calma y profesionalismo */
+    background-color: #f0f2f5;
+    font-family: 'Roboto', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: #333;
+}
+
+.contenedor {
+    /* Blanco puro: Transmite limpieza y orden */
+    background: #ffffff;
+    width: 90%;
+    max-width: 500px; /* Limita el ancho para que no se vea estirado */
+    padding: 40px;
+    border-radius: 12px;
+    /* Sombra suave: Da efecto de elevación (Material Design) */
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+header h1 {
+    /* Azul corporativo oscuro: Confianza, seguridad, inteligencia */
+    color: #2c3e50;
+    font-size: 24px;
+    margin-bottom: 5px;
+    font-weight: 700;
+}
+
+.subtitulo {
+    color: #7f8c8d;
+    font-size: 14px;
+    margin-bottom: 30px;
+    font-weight: 300;
+}
+
+/* Estilos para los grupos de inputs */
+.grupo-input {
+    text-align: left;
+    margin-bottom: 15px;
+}
+
+.grupo-input label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 13px;
+    color: #555;
+    font-weight: 500;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="date"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    background-color: #fafafa;
+}
+
+/* Efecto al hacer clic en un campo: Borde azul suave */
+input:focus {
+    border-color: #3498db;
+    background-color: #fff;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+/* Disposición en columnas para campos cortos */
+.fila-doble {
+    display: flex;
+    gap: 15px;
+}
+
+.fila-doble .grupo-input {
+    flex: 1;
+}
+
+/* Botón principal */
+.boton-factura {
+    width: 100%;
+    padding: 14px;
+    margin-top: 20px;
+    /* Verde Esmeralda: Crecimiento, éxito, dinero, acción positiva */
+    background-color: #27ae60;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    box-shadow: 0 4px 6px rgba(39, 174, 96, 0.2);
+}
+
+.boton-factura:hover {
+    background-color: #219150; /* Verde un poco más oscuro al pasar el mouse */
+}
+
+.boton-factura:active {
+    transform: scale(0.98); /* Efecto de presionado */
+}
+
+/* Ajustes para móviles */
+@media (max-width: 600px) {
+    .contenedor {
+        width: 95%;
+        padding: 20px;
+    }
+    
+    .fila-doble {
+        flex-direction: column;
+        gap: 0;
+    }
+}
